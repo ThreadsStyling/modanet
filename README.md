@@ -15,6 +15,43 @@
 **ModaNet** is a street fashion images dataset consisting of annotations related to RGB images. ModaNet provides multiple polygon annotations for each image. This dataset is described in a technical paper with the title [`ModaNet: A Large-Scale Street Fashion Dataset with Polygon Annotations`](https://arxiv.org/pdf/1807.01394.pdf).
 Each polygon is associated with a label from 13 meta fashion categories. The annotations are based on images in the [PaperDoll image set](https://github.com/kyamagu/paperdoll/tree/master/data/chictopia), which has only a few hundred images annotated by the superpixel-based tool. The contribution of ModaNet is to provide new and extra **polygon** annotations for the images.
 
+## Downloading Paperdoll images for ModaNet
+
+1. `file_name` and `image_id` annotations in ModaNet refer to IDs from
+   Paperdoll dataset. Extract names of files you need to download for
+   ModaNet:
+
+    ```
+    cat annotations/modanet2018_instances_{train,val}.json | jq -r '.images | .[].file_name' > modanet-filenames
+    ```
+
+2. Download complete Paperdoll image-URL mapping (it's a Matlab file):
+
+    ```
+    wget http://vision.cs.stonybrook.edu/~kyamagu/paperdoll/data-v1.0.tar
+    tar zxf data-v1.0.tar
+    mv data/paperdoll_dataset.mat .
+    ```
+
+3. Extract it to a text file:
+
+    ```
+    octave show_paperdoll_photo_list.m > paperdoll-photos
+    ```
+
+4. Filter it against ModaNet:
+
+    ```
+    xsv join -n 1 paperdoll-photos 1 modanet-filenames | xsv select -n 1,2 > modanet-paperdoll-photos
+    ```
+
+5. Download the images:
+
+    ```
+    mkdir images
+    cd images
+    cat ../modanet-paperdoll-photos | sed -e 's/,/ /' | tr ' ' '\n' | parallel --bar -N2 '[ ! -e {1} ] && wget --timeout 10 --quiet {2} -O {1}'
+    ```
 
 ## Why we made ModaNet
 
@@ -29,7 +66,7 @@ https://help.github.com/articles/installing-git-large-file-storage/
 Then you should git clone the repo along with the annotation files, otherwise the annotation files would not be downloaded directly using `git clone`.
 
 ```
-git clone git@github.com:eBay/modanet.git 
+git clone git@github.com:eBay/modanet.git
 ```
 
 Before you start working on the dataset, please verify the annotation files by using `md5sum`. In Mac, this requires you to run the following command:
@@ -92,7 +129,7 @@ license{
 }
 
 annotation{
-  'area': int, 
+  'area': int,
   'bbox': [x,y,width,height],
   'segmentation': [polygon],
   'image_id': int,
@@ -198,7 +235,7 @@ Example
 
 We acknowledge the contribution of COCOdataset team and all the format would follow the same style as those in the COCOdataset. Check [COCOAPI](https://github.com/cocodataset/cocoapi).
 
-Thanks to the [EvalAI team](https://evalAI.cloudcv.org), we have [ModaNet challenge leaderboard](https://evalai.cloudcv.org/web/challenges/challenge-page/151), please submit your best results there. It provides leaderboards for semantic segmentation, instance segmentation, and object detection, all in [COCO-style](http://cocodataset.org). You might need to register an account in EvalAI. 
+Thanks to the [EvalAI team](https://evalAI.cloudcv.org), we have [ModaNet challenge leaderboard](https://evalai.cloudcv.org/web/challenges/challenge-page/151), please submit your best results there. It provides leaderboards for semantic segmentation, instance segmentation, and object detection, all in [COCO-style](http://cocodataset.org). You might need to register an account in EvalAI.
 
 ## Contributing
 You are more than welcome to contribute to this github repo! Either by submitting a bug report, or providing feedback about this dataset. Please open issues for specific tasks or post to the contact Google group below.
@@ -225,5 +262,3 @@ Biblatex entry:
 ```
 ## License
 This annotation data is released under the [Creative Commons Attribution-NonCommercial license 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
-
-
