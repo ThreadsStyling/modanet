@@ -39,7 +39,8 @@ Each polygon is associated with a label from 13 meta fashion categories. The ann
     octave show_paperdoll_photo_list.m > paperdoll-photos
     ```
 
-4. Filter it against ModaNet:
+4. Filter it against ModaNet (ModaNet annotations are provided only
+   for a subset of Paperdoll dataset):
 
     ```
     xsv join -n 1 paperdoll-photos 1 modanet-filenames | xsv select -n 1,2 > modanet-paperdoll-photos
