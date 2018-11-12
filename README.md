@@ -43,7 +43,7 @@ Each polygon is associated with a label from 13 meta fashion categories. The ann
     ```
     mkdir images
     cd images
-    cat ../modanet-paperdoll-photos | sed -e 's/,/ /' | tr ' ' '\n' | parallel --bar -N2 '[ ! -e {1} ] && wget --timeout 10 --quiet {2} -O {1}'
+    cat ../modanet-paperdoll-photos | sed -e 's/ /%20/' | sed -e 's/,/ /' | tr ' ' '\n' | parallel --bar -N2 '[ ! -e {1} ] && wget --timeout 10 --quiet {2} -O {1}'
     ls -1 | rename -A modanet-
     ```
 
