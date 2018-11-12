@@ -25,18 +25,10 @@ Each polygon is associated with a label from 13 meta fashion categories. The ann
     cat annotations/modanet2018_instances_{train,val}.json | jq -r '.images | .[].file_name' > modanet-filenames
     ```
 
-2. Download complete Paperdoll image-URL mapping (it's a Matlab file):
+2. Extract complete Paperdoll image-URL mapping:
 
     ```
-    wget http://vision.cs.stonybrook.edu/~kyamagu/paperdoll/data-v1.0.tar
-    tar zxf data-v1.0.tar
-    mv data/paperdoll_dataset.mat .
-    ```
-
-3. Extract it to a text file:
-
-    ```
-    octave show_paperdoll_photo_list.m > paperdoll-photos
+    pipenv run python get-urls.py ./chictopia.sqlite3 paperdoll-photos
     ```
 
 4. Filter it against ModaNet (ModaNet annotations are provided only
@@ -52,6 +44,7 @@ Each polygon is associated with a label from 13 meta fashion categories. The ann
     mkdir images
     cd images
     cat ../modanet-paperdoll-photos | sed -e 's/,/ /' | tr ' ' '\n' | parallel --bar -N2 '[ ! -e {1} ] && wget --timeout 10 --quiet {2} -O {1}'
+    ls -1 | rename -A modanet-
     ```
 
 ## Why we made ModaNet
