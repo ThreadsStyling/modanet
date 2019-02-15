@@ -15,6 +15,8 @@
 **ModaNet** is a street fashion images dataset consisting of annotations related to RGB images. ModaNet provides multiple polygon annotations for each image. This dataset is described in a technical paper with the title [`ModaNet: A Large-Scale Street Fashion Dataset with Polygon Annotations`](https://arxiv.org/pdf/1807.01394.pdf).
 Each polygon is associated with a label from 13 meta fashion categories. The annotations are based on images in the [PaperDoll image set](https://github.com/kyamagu/paperdoll/tree/master/data/chictopia), which has only a few hundred images annotated by the superpixel-based tool. The contribution of ModaNet is to provide new and extra **polygon** annotations for the images.
 
+See `s3://clothing-recognition-training-data.staging.threads.team`
+
 ## Downloading Paperdoll images for ModaNet
 
 1. `file_name` and `image_id` annotations in ModaNet refer to IDs from
@@ -25,26 +27,21 @@ Each polygon is associated with a label from 13 meta fashion categories. The ann
     cat annotations/modanet2018_instances_{train,val}.json | jq -r '.images | .[].file_name' > modanet-filenames
     ```
 
-2. Extract complete Paperdoll image-URL mapping:
+    There should be a little over 55K images in the set:
 
     ```
-    pipenv run python get-urls.py ./chictopia.sqlite3 paperdoll-photos
+    wc -l modanet-filenames
+    55176 modanet-filenames
     ```
 
-4. Filter it against ModaNet (ModaNet annotations are provided only
-   for a subset of Paperdoll dataset):
+2. Fetch the entire [Chictopia image
+   set](https://github.com/kyamagu/paperdoll/tree/17f95d6/data/chictopia#downloading-image-data).
+
+3. Extract just the Modanet images with
 
     ```
-    xsv join -n 1 paperdoll-photos 1 modanet-filenames | xsv select -n 1,2 > modanet-paperdoll-photos
-    ```
-
-5. Download the images:
-
-    ```
-    mkdir images
-    cd images
-    cat ../modanet-paperdoll-photos | sed -e 's/ /%20/' | sed -e 's/,/ /' | tr ' ' '\n' | parallel --bar -N2 '[ ! -e {1} ] && wget --timeout 10 --quiet {2} -O {1}'
-    ls -1 | rename -A modanet-
+    mkdir modanet-images
+    pipenv run python extract.py modanet-filenames path/to/photos.lmdb modanet-images
     ```
 
 ## Why we made ModaNet
